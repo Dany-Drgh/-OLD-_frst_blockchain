@@ -3,11 +3,11 @@ from blockchain import *
 from time import time
 from uuid import uuid4
 from textwrap import dedent
-from flask import flask, jsonify, request
+from flask import Flask, jsonify, request
 
 
 # Node creation
-app = flask(__name__)
+app = Flask(__name__)
 
 # Generate a unique address for the node
 node_identifier = str(uuid4()).replace('-','')
@@ -32,6 +32,8 @@ def mine():
     
     # Forging new block by adding it to chain
     previous_hash = blockchain.hash(last_block)
+    block = blockchain.new_block(proof, previous_hash)
+
     response = {
         'message' : "New Block is forged",
         'index' : block['index'],

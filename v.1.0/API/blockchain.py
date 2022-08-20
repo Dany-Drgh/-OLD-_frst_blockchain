@@ -4,8 +4,6 @@ import json
 from time import time
 from uuid import uuid4
 
-from flask import flask
-
 class Blockchain(object):
     def __init__(self):
         self.chain = []
@@ -20,13 +18,17 @@ class Blockchain(object):
         # return: <dict> New Block
 
         block = {
-            "index": len(self.chain)+1,
-            "proof": proof,
-            "previous_hash": previous_hash or self.hash(self.chain[-1])
+            'index': len(self.chain) + 1,
+            'timestamp': time(),
+            'transactions': self.current_transactions,
+            'proof': proof,
+            'previous_hash': previous_hash or self.hash(self.chain[-1]),
         }
 
         # Resetting current transaction lists
         self.current_transactions = []
+
+        self.chain.append(block)
         return block
         
 
