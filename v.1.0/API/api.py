@@ -1,4 +1,3 @@
-from operator import index
 from blockchain import *
 from time import time
 from uuid import uuid4
@@ -42,8 +41,6 @@ def mine():
         'previous_hash': block['previous_hash'],
     }
     return jsonify(response), 200
-
-
 
 # new transaction endpoint creation
 @app.route("/transaction/new",methods=['POST'])

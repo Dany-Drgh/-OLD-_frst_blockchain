@@ -2,21 +2,79 @@ import hashlib
 import json
 
 from time import time
-from uuid import uuid4
+from urllib import request
+from urllib.parse import urlparse
+
 
 class Blockchain(object):
     def __init__(self):
         self.chain = []
         self.current_transactions = []
+        self.nodes = set()
 
         self.new_block(proof= 100, previous_hash=1)
+    
+    def register_node (self, address):
+        #Add new node to list of nodes
+        parsed_url = urlparse(address)
+        self.nodes.add(parsed_url.netloc)
+        
+    def valid_node (self, chain):
+        # Check given blockchain validity
+        last_block = chain[0]
+        current_index = 1
+
+        while current_index < len(chain):
+            block = chain[current_index]
+            print(f'{last_block}')
+            print(f'{block}')
+            print("\n--------------------\n")
+
+            # Check that hash is correct
+            if block['previous_hash'] != self.hash(last_block):
+                return False
+            
+            # Check that P.O.W. is correct
+            if not self.valid_proof(last_block['proof'], block['proof']):
+                return False
+
+            last_block = block
+            current_index += 1
+        return True
+
+    def resolve_conflict (self):
+        # Consensus algorithm, resolves conflicts by replacing all chains with longest valid one
+        # returns True if chain replaced False if not 
+        neighbors = self.nodes
+        new_chain = None
+
+        max_length = len(self.chain) # Longest known length of chain
+
+        # Check all chains from neighbors
+        for node in neighbors:
+            response = request.get(f'http://{node}/chain')
+        
+            if response.status_code == 200:
+                length = resposne.json()['length']
+                chain = response.json()['chain']
+
+            # Compare chains lengths and check for validity
+            if length > max_length and self.valid_chain(chain):
+                max_length = length
+                new_chain = chain
+        
+        # If new chain is found replace old one 
+        if new_chain:
+            self.chain = new_chain
+            return True
+        
+        return False
 
     def new_block(self, proof, previous_hash=None):
         # Create a new Block in the Blockchain
         # proof: <int> The proof given by the Proof of Work algorithm
         # previous_hash: (Optional) <str> Hash of previous Block
         # return: <dict> New Block
-
         block = {
             'index': len(self.chain) + 1,
             'timestamp': time(),
@@ -29,8 +87,7 @@ class Blockchain(object):
         self.current_transactions = []
 
         self.chain.append(block)
-        return block
-        
+        return block        
 
     def new_transaction(self, sender, recipient, amount ):
         # Creates a new transaction to go into the next mined Block
@@ -54,13 +111,14 @@ class Blockchain(object):
 
         return proof
 
+
     @staticmethod
     def valid_proof(last_proof, proof):
+
         # Validates the Proof: Does hash(last_proof, proof) contain 4 leading zeroes?
         guess = f'{last_proof}{proof}'.encode()
         guess_hash = hashlib.sha256(guess).hexdigest()
         return guess_hash[:4] == '0000'
-
 
     @staticmethod 
     def hash(block):
