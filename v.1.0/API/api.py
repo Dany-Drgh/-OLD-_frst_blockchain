@@ -1,3 +1,5 @@
+from crypt import methods
+from urllib import response
 from blockchain import *
 from time import time
 from uuid import uuid4
@@ -57,7 +59,7 @@ def new_transaction():
     response= {'message':f'Transaction will be added to Block {index}'}
     return jsonify(response), 201
 
-#chain endpoint creation
+# chain endpoint creation
 @app.route("/chain", methods=["GET"])
 def full_chain():
     response = {
@@ -65,6 +67,43 @@ def full_chain():
         'length': len(blockchain.chain),
     }
     return jsonify(response), 200
+
+
+# Neighboring nodes adding endpoint
+@app.route("/nodes/register", methods=["POST"])
+def register_nodes():
+
+    values = request.get_json()
+
+    nodes = values.get('nodes')
+    if nodes is None:
+        return "Error: Please enter valid list of nodes", 400
+    
+    for node in nodes :
+        blockchain.register_node(node)
+
+    response = {
+        'message': 'New nodes added',
+        'total_nodes': list(blockchain.nodes) 
+    }
+    return jsonify(response), 200
+
+# Conflict resolution algorithm
+@app.route("/nodes/resolve", methods=["GET"])
+def consensus():
+    replaced = blockchain.resolve_conflicts()
+
+    if replaced:
+        response={
+            'message':'Current chain has been replaced',
+            'chain':blockchain.chain
+        }
+    else:
+        response={
+            'message':'Current chain is authoritative',
+            'chain':blockchain.chain
+        }
+    return jsonify(response),200 
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)

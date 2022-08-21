@@ -42,7 +42,7 @@ class Blockchain(object):
             current_index += 1
         return True
 
-    def resolve_conflict (self):
+    def resolve_conflicts(self):
         # Consensus algorithm, resolves conflicts by replacing all chains with longest valid one
         # returns True if chain replaced False if not 
         neighbors = self.nodes
