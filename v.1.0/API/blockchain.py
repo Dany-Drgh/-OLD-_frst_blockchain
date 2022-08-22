@@ -1,6 +1,5 @@
 import hashlib
 import json
-
 from time import time
 from urllib import request
 from urllib.parse import urlparse
@@ -82,6 +81,9 @@ class Blockchain(object):
             'proof': proof,
             'previous_hash': previous_hash or self.hash(self.chain[-1]),
         }
+        # Get the hash of this new block, and add it to the block
+        block_hash = self.hash(block)
+        block["hash"] = block_hash
 
         # Resetting current transaction lists
         self.current_transactions = []

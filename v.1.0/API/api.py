@@ -1,9 +1,5 @@
-from crypt import methods
-from urllib import response
-from blockchain import *
-from time import time
+from blockchain import Blockchain
 from uuid import uuid4
-from textwrap import dedent
 from flask import Flask, jsonify, request
 
 
@@ -37,6 +33,7 @@ def mine():
 
     response = {
         'message' : "New Block is forged",
+        'hash':block['hash'],
         'index' : block['index'],
         'transactions': block['transactions'],
         'proof': block['proof'],
